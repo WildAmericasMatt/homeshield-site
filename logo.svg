@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" role="img" aria-label="HomeShield">
+  <path fill="#0B1F33" d="M48 6l36 16v29c0 20.8-14.6 39.6-36 45C26.6 90.6 12 71.8 12 51V22L48 6z"/>
+  <path fill="#1A7A74" d="M48 16.4l25 11v22.6c0 15-10.2 28.8-25 33-14.8-4.2-25-18-25-33V27.4l25-11z"/>
+  <path fill="#F6F3EE" d="M48 30.4l16 6.8v13.8c0 9-6.2 17.2-16 20-9.8-2.8-16-11-16-20V37.2l16-6.8z"/>
+  <text x="104" y="64" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="600" fill="#0B1F33">HomeShield</text>
+</svg>
