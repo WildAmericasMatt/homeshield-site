@@ -3,6 +3,7 @@
 
   const MODE_KEY = "homeshield-review";
   const STORE_PREFIX = "homeshield-review-notes:";
+  const WELCOME_KEY = "homeshield-review-welcome";
   const FORM_ENDPOINT = "https://api.web3forms.com/submit";
   const ACCESS_KEY = "89aade33-5357-4d01-8614-1d0e744ac1e7";
   const TIMEOUT_MS = 15000;
@@ -32,6 +33,16 @@
       savedSent: "Saved · Sent",
       savedLocal: "Saved locally · Couldn’t send",
       saving: "Saving…",
+      welcomeTitle: "Hello, Michelle",
+      welcomeBody: "Matt and HomeShield are ready for any questions. Leave comment bubbles on the page to mark anything you’d like to change.",
+      welcomePlaceholder: "Have a question? Write it here (optional)",
+      welcomeSend: "Send",
+      welcomeClose: "Close",
+      welcomeSent: "Thank you. We received your question and will be in touch shortly.",
+      welcomeError: "We couldn’t send that. Please try again.",
+      welcomeSending: "Sending…",
+      welcomeEmpty: "Write a question, or close this window.",
+      welcomeBtn: "Questions",
     },
     pt: {
       add: "Adicionar comentário",
@@ -57,6 +68,16 @@
       savedSent: "Salvo · Enviado",
       savedLocal: "Salvo neste aparelho · Não foi possível enviar",
       saving: "Salvando…",
+      welcomeTitle: "Olá, Michelle",
+      welcomeBody: "O Matt e a HomeShield estão prontos para qualquer pergunta. Deixe bolhas de comentário na página para marcar o que quiser mudar.",
+      welcomePlaceholder: "Tem alguma pergunta? Escreva aqui (opcional)",
+      welcomeSend: "Enviar",
+      welcomeClose: "Fechar",
+      welcomeSent: "Obrigado. Recebemos a sua pergunta e em breve entraremos em contato.",
+      welcomeError: "Não foi possível enviar. Tente de novo.",
+      welcomeSending: "Enviando…",
+      welcomeEmpty: "Escreva uma pergunta, ou feche esta janela.",
+      welcomeBtn: "Perguntas",
     },
   };
 
@@ -127,6 +148,11 @@
       <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v7M5 7l3 3 3-3M3 13h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="t-en">Export</span><span class="t-pt">Exportar</span>
     </button>
+    <button type="button" id="hs-review-btn-welcome" aria-haspopup="dialog" aria-controls="hs-review-welcome">
+      <span class="hs-review-welcome-q" aria-hidden="true">?</span>
+      <span class="hs-review-full t-pt">Perguntas</span>
+      <span class="hs-review-full t-en">Questions</span>
+    </button>
     <button type="button" id="hs-review-btn-exit" class="hs-review-exit">
       <span class="hs-review-full t-en">Exit review</span><span class="hs-review-short t-en">Exit</span>
       <span class="hs-review-full t-pt">Sair da revisão</span><span class="hs-review-short t-pt">Sair</span>
@@ -171,7 +197,44 @@
     <ul id="hs-review-list-items"></ul>
   `;
 
-  root.append(toolbar, pinsLayer, composer, list);
+  const welcome = document.createElement("div");
+  welcome.className = "hs-review-welcome hs-review-ui";
+  welcome.id = "hs-review-welcome";
+  welcome.setAttribute("role", "dialog");
+  welcome.setAttribute("aria-modal", "true");
+  welcome.setAttribute("aria-labelledby", "hs-review-welcome-title");
+  welcome.setAttribute("aria-describedby", "hs-review-welcome-body");
+  welcome.hidden = true;
+  welcome.innerHTML = `
+    <div class="hs-review-welcome-card">
+      <h2 id="hs-review-welcome-title">
+        <span class="t-pt">Olá, Michelle</span>
+        <span class="t-en">Hello, Michelle</span>
+      </h2>
+      <p id="hs-review-welcome-body">
+        <span class="t-pt">O Matt e a HomeShield estão prontos para qualquer pergunta. Deixe bolhas de comentário na página para marcar o que quiser mudar.</span>
+        <span class="t-en">Matt and HomeShield are ready for any questions. Leave comment bubbles on the page to mark anything you’d like to change.</span>
+      </p>
+      <label class="hs-review-welcome-label" for="hs-review-welcome-text">
+        <span class="t-pt">Tem alguma pergunta? Escreva aqui (opcional)</span>
+        <span class="t-en">Have a question? Write it here (optional)</span>
+      </label>
+      <textarea id="hs-review-welcome-text" rows="4"></textarea>
+      <div class="hs-review-actions">
+        <button type="button" class="primary" id="hs-review-welcome-send">
+          <span class="t-pt">Enviar</span>
+          <span class="t-en">Send</span>
+        </button>
+        <button type="button" id="hs-review-welcome-close">
+          <span class="t-pt">Fechar</span>
+          <span class="t-en">Close</span>
+        </button>
+      </div>
+      <div class="hs-review-status" id="hs-review-welcome-status" role="status" aria-live="polite"></div>
+    </div>
+  `;
+
+  root.append(toolbar, pinsLayer, composer, list, welcome);
 
   const els = {
     add: toolbar.querySelector("#hs-review-btn-add"),
@@ -179,6 +242,11 @@
     listBtn: toolbar.querySelector("#hs-review-btn-list"),
     exportBtn: toolbar.querySelector("#hs-review-btn-export"),
     exit: toolbar.querySelector("#hs-review-btn-exit"),
+    welcomeBtn: toolbar.querySelector("#hs-review-btn-welcome"),
+    welcomeText: welcome.querySelector("#hs-review-welcome-text"),
+    welcomeSend: welcome.querySelector("#hs-review-welcome-send"),
+    welcomeClose: welcome.querySelector("#hs-review-welcome-close"),
+    welcomeStatus: welcome.querySelector("#hs-review-welcome-status"),
     count: toolbar.querySelector("#hs-review-count"),
     visHide: toolbar.querySelector(".hs-vis-hide"),
     visShow: toolbar.querySelector(".hs-vis-show"),
@@ -660,6 +728,11 @@
 
   function onKeydown(event) {
     if (event.key === "Escape") {
+      if (!welcome.hidden) {
+        closeWelcome();
+        event.preventDefault();
+        return;
+      }
       if (openId) {
         closeComposer();
         event.preventDefault();
@@ -677,8 +750,105 @@
     }
   }
 
+  function welcomeSeen() {
+    try {
+      return localStorage.getItem(WELCOME_KEY) === "1";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function markWelcomeSeen() {
+    try {
+      localStorage.setItem(WELCOME_KEY, "1");
+    } catch (_) {}
+  }
+
+  function showWelcomeStatus(kind, message) {
+    els.welcomeStatus.className = "hs-review-status" + (kind ? " is-" + kind : "");
+    els.welcomeStatus.textContent = message || "";
+  }
+
+  function refreshWelcomeCopy() {
+    els.welcomeText.placeholder = t("welcomePlaceholder");
+    els.welcomeBtn.setAttribute("aria-label", t("welcomeBtn"));
+  }
+
+  function openWelcome() {
+    welcome.hidden = false;
+    els.welcomeBtn.setAttribute("aria-pressed", "true");
+    refreshWelcomeCopy();
+    if (!els.welcomeStatus.textContent) showWelcomeStatus("", "");
+    const focusTarget = els.welcomeText;
+    requestAnimationFrame(() => {
+      focusTarget.focus();
+    });
+  }
+
+  function closeWelcome() {
+    welcome.hidden = true;
+    els.welcomeBtn.setAttribute("aria-pressed", "false");
+    markWelcomeSeen();
+    if (document.activeElement && welcome.contains(document.activeElement)) {
+      els.welcomeBtn.focus();
+    }
+  }
+
+  async function sendWelcomeQuestion() {
+    const text = els.welcomeText.value.trim();
+    if (!text) {
+      showWelcomeStatus("err", t("welcomeEmpty"));
+      els.welcomeText.focus();
+      return;
+    }
+    els.welcomeSend.disabled = true;
+    showWelcomeStatus("pending", t("welcomeSending"));
+    const payload = {
+      access_key: ACCESS_KEY,
+      subject: "HomeShield question from Michelle",
+      from_name: "HomeShield Review",
+      name: "Michelle",
+      message: text,
+      language: currentLang(),
+      timestamp: new Date().toISOString(),
+      page: location.pathname,
+    };
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) throw new Error("submit-failed");
+      els.welcomeText.value = "";
+      showWelcomeStatus("ok", t("welcomeSent"));
+      markWelcomeSeen();
+    } catch (_) {
+      showWelcomeStatus("err", t("welcomeError"));
+    } finally {
+      clearTimeout(timer);
+      els.welcomeSend.disabled = false;
+    }
+  }
+
   function bind() {
     els.add.addEventListener("click", () => setAddMode(!addMode));
+    els.welcomeBtn.addEventListener("click", () => {
+      if (welcome.hidden) openWelcome();
+      else closeWelcome();
+    });
+    els.welcomeClose.addEventListener("click", closeWelcome);
+    els.welcomeSend.addEventListener("click", sendWelcomeQuestion);
+    welcome.addEventListener("click", (event) => {
+      if (event.target === welcome) closeWelcome();
+    });
     els.vis.addEventListener("click", () => setCommentsVisible(!commentsVisible));
     els.listBtn.addEventListener("click", () => setListOpen(!listOpen));
     els.listClose.addEventListener("click", () => setListOpen(false));
@@ -703,6 +873,15 @@
     }
 
     const mo = new MutationObserver(() => {
+      refreshWelcomeCopy();
+      if (!welcome.hidden && els.welcomeStatus.classList.contains("is-ok")) {
+        showWelcomeStatus("ok", t("welcomeSent"));
+      } else if (!welcome.hidden && els.welcomeStatus.classList.contains("is-err")) {
+        const empty = els.welcomeText.value.trim() === "" && els.welcomeStatus.textContent;
+        showWelcomeStatus("err", empty && !els.welcomeSend.disabled ? t("welcomeEmpty") : t("welcomeError"));
+      } else if (!welcome.hidden && els.welcomeStatus.classList.contains("is-pending")) {
+        showWelcomeStatus("pending", t("welcomeSending"));
+      }
       if (openId) {
         els.text.placeholder = t("placeholder");
         const note = findNote(openId);
@@ -732,6 +911,8 @@
     bind();
     setCommentsVisible(true);
     renderPins();
+    refreshWelcomeCopy();
+    if (!welcomeSeen()) openWelcome();
   }
 
   if (document.readyState === "loading") {

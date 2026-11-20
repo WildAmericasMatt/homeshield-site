@@ -19,6 +19,7 @@
   --hs-z-bar: 200;
   --hs-z-list: 220;
   --hs-z-note: 230;
+  --hs-z-welcome: 260;
   font-family: "Source Sans 3", system-ui, -apple-system, sans-serif;
   font-size: 15px;
   line-height: 1.4;
@@ -396,6 +397,92 @@ body.hs-review-comments-hidden .hs-review-composer {
   text-align: center;
 }
 
+.hs-review-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: var(--hs-z-welcome);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 88px;
+  background: rgba(11, 31, 51, 0.46);
+}
+
+.hs-review-welcome[hidden] {
+  display: none !important;
+}
+
+.hs-review-welcome-card {
+  width: min(420px, 100%);
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  background: var(--hs-white);
+  color: var(--hs-ink);
+  border: 1px solid var(--hs-line);
+  border-radius: 16px;
+  box-shadow: var(--hs-shadow);
+  padding: 22px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hs-review-welcome-card h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--hs-navy);
+  letter-spacing: -0.02em;
+}
+
+.hs-review-welcome-card p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--hs-ink);
+}
+
+.hs-review-welcome-label {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--hs-muted);
+}
+
+.hs-review-welcome-card textarea {
+  width: 100%;
+  min-height: 104px;
+  resize: vertical;
+  border: 1px solid var(--hs-line);
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--hs-paper);
+}
+
+.hs-review-welcome-card textarea:focus {
+  outline: 3px solid var(--hs-teal);
+  outline-offset: 0;
+  border-color: var(--hs-teal);
+}
+
+.hs-review-welcome-card .hs-review-actions {
+  margin-top: 2px;
+}
+
+.hs-review-toolbar .hs-review-welcome-q {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 @media (max-width: 640px) {
   .hs-review-toolbar {
     bottom: 8px;
@@ -441,4 +528,27 @@ body.hs-review-comments-hidden .hs-review-composer {
   .hs-review-toolbar .hs-review-full { display: none !important; }
   body.lang-en .hs-review-toolbar .hs-review-short.t-en,
   body.lang-pt .hs-review-toolbar .hs-review-short.t-pt { display: inline !important; }
+}
+
+
+@media (max-width: 820px) {
+  .hs-review-toolbar #hs-review-btn-welcome .hs-review-full {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hs-review-welcome {
+    padding: 12px 12px 80px;
+    align-items: flex-end;
+  }
+  .hs-review-welcome-card {
+    width: 100%;
+    max-height: calc(100vh - 100px);
+    border-radius: 16px;
+    padding: 18px 16px 14px;
+  }
+  .hs-review-welcome-card h2 {
+    font-size: 20px;
+  }
 }
